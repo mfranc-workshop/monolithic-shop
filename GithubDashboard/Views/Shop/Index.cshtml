@@ -1,0 +1,35 @@
+﻿@model IEnumerable<GithubDashboard.Data.Product>
+
+@{
+    ViewData["Title"] = "Shop";
+}
+
+This is Awesome Shop! Stay while and buy!
+
+<script>
+    // global js cart
+
+    let cart = [];
+   
+    function addToCart(id)
+    {
+        if (!id) {
+            // log error that product couldnt be added to the cart
+            return;
+        }
+
+        cart.push(id);
+
+        console.log("product with id " + id + " added ot cart");
+
+        // console log - display cart
+    }
+
+</script>
+
+<ul>
+    @foreach(var product in Model)
+    {
+        <li>@product.Name - @product.Price - <a onclick="addToCart(@product.Id)">add to Cart</a></li>
+    }
+</ul>

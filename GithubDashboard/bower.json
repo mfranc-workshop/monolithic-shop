@@ -1,0 +1,8 @@
+{
+  "name": "asp.net",
+  "private": true,
+  "dependencies": {},
+  "resolutions": {
+    "jquery-validation": ">=1.16"
+  }
+}
