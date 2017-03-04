@@ -10,14 +10,19 @@ This is Awesome Shop! Stay while and buy!
 <script id="cart" type="text/x-handlebars-template">
     <div class="cart">
         {{#each cart}}
-            <li>{{@@key}} - {{this.count}} - {{this.sumPrice}}</li>
+            <li>{{@@key}} - {{this.count}} - {{this.sumPrice}} <button onClick="removeFromCart('{{@@key}}')">Remove</button></li>
         {{/each}}
         price - {{price}}
     </div>
+    <button onClick="goToCheckout">Checkout</button>
 </script>
 
 <script>
     let cart = new Map();
+
+    function goToCheckout() {
+
+    }
 
     function refreshCartDisplay(cart) {
         if(!cart){
@@ -39,7 +44,22 @@ This is Awesome Shop! Stay while and buy!
 
         let cartView = template({ cart: templateData, price });        let cartPlaceholder = document.getElementById("cart-placeholder");
         cartPlaceholder.innerHTML = cartView;
-     }
+    }
+
+    function removeFromCart(key) {
+        let originalValue = cart.get(key); 
+        let newCount = originalValue.count - 1;
+
+        if(newCount <= 0) {
+            cart.delete(key);
+        }
+        else {
+            originalValue.count = newCount;
+            cart.set(key, originalValue);
+        }
+
+        refreshCartDisplay(cart);
+    }
 
     function addToCart(item) {
         if (!item) {
@@ -60,6 +80,7 @@ This is Awesome Shop! Stay while and buy!
     // TODO: how to calculate cart price? server side calls to api?
     // TODO: before paying we need to refresh the price and availiability of the items
     // TODO: we should also display availability in the stores
+    // TODO: current solution works only on refresh as add to cart has static values
 </script>
 
 <ul>
