@@ -6,30 +6,66 @@
 
 This is Awesome Shop! Stay while and buy!
 
-<script>
-    // global js cart
 
-    let cart = [];
-   
-    function addToCart(id)
-    {
-        if (!id) {
+<script id="cart" type="text/x-handlebars-template">
+    <div class="cart">
+        {{#each cart}}
+            <li>{{@@key}} - {{this.count}} - {{this.sumPrice}}</li>
+        {{/each}}
+        price - {{price}}
+    </div>
+</script>
+
+<script>
+    let cart = new Map();
+
+    function refreshCartDisplay(cart) {
+        if(!cart){
+            // houston we have a problem
+            return;
+        }
+
+        let source = document.getElementById("cart").innerText;
+        let template = Handlebars.compile(source);
+
+        let templateData = { };
+
+        let price = 0;
+
+        for (var [key, value] of cart) {
+            templateData[key] = { count: value.count, sumPrice: value.count * value.price };
+            price += (value.price * value.count);
+        }
+
+        let cartView = template({ cart: templateData, price });        let cartPlaceholder = document.getElementById("cart-placeholder");
+        cartPlaceholder.innerHTML = cartView;
+     }
+
+    function addToCart(item) {
+        if (!item) {
             // log error that product couldnt be added to the cart
             return;
         }
 
-        cart.push(id);
+        let originalValue = cart.get(item.name) || { price: item.price, count: 0};
+        originalValue.count = originalValue.count + 1;
 
-        console.log("product with id " + id + " added ot cart");
+        cart.set(item.name, originalValue);
 
-        // console log - display cart
+        console.log("product with name" + item.name + " added ot cart");
+
+        refreshCartDisplay(cart);
     }
 
+    // TODO: how to calculate cart price? server side calls to api?
+    // TODO: before paying we need to refresh the price and availiability of the items
+    // TODO: we should also display availability in the stores
 </script>
 
 <ul>
-    @foreach(var product in Model)
+    @foreach (var product in Model)
     {
-        <li>@product.Name - @product.Price - <a onclick="addToCart(@product.Id)">add to Cart</a></li>
+        <li>@product.Name - @product.Price - <button onclick="addToCart({ id: '@product.Id', name: '@product.Name', price: @product.Price })">Add</button></li>
     }
 </ul>
+<div id="cart-placeholder"></div>
