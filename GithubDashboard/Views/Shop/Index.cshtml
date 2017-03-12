@@ -10,11 +10,11 @@ This is Awesome Shop! Stay while and buy!
 <script id="cart" type="text/x-handlebars-template">
     <div class="cart">
         {{#each cart}}
-            <li>{{@@key}} - {{this.count}} - {{this.sumPrice}} <button onClick="removeFromCart('{{@@key}}')">Remove</button></li>
+            <li>{{this.name}} - {{this.count}} - {{this.sumPrice}} <button onClick="removeFromCart('{{@@key}}')">Remove</button></li>
         {{/each}}
         price - {{price}}
     </div>
-    <button onClick="goToCheckout">Checkout</button>
+    <button onClick="goToCheckout()">Checkout</button>
 </script>
 
 <script>
@@ -22,6 +22,29 @@ This is Awesome Shop! Stay while and buy!
 
     function goToCheckout() {
 
+        let object = [];
+
+        for (var [key, value] of cart) {
+            object.push({
+                 product: {
+                    id: value.id,
+                    name: value.name, 
+                    price: value.price
+                }, 
+                count: value.count
+            });
+        }
+
+        fetch('/api/order', {
+                method: 'PUT',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify(object)
+            }).then(function(response) { return response.json(); })
+              .then(function(json) {
+                document.location.href = '/checkout/' + json.orderId;
+            });
     }
 
     function refreshCartDisplay(cart) {
@@ -38,7 +61,7 @@ This is Awesome Shop! Stay while and buy!
         let price = 0;
 
         for (var [key, value] of cart) {
-            templateData[key] = { count: value.count, sumPrice: value.count * value.price };
+            templateData[key] = { name: value.name, count: value.count, sumPrice: value.count * value.price };
             price += (value.price * value.count);
         }
 
@@ -66,21 +89,17 @@ This is Awesome Shop! Stay while and buy!
             // log error that product couldnt be added to the cart
             return;
         }
-
-        let originalValue = cart.get(item.name) || { price: item.price, count: 0};
+        let key = item.id;
+        let originalValue = cart.get(key) || { id: item.id, name: item.name, price: item.price, count: 0};
         originalValue.count = originalValue.count + 1;
 
-        cart.set(item.name, originalValue);
+        cart.set(key, originalValue);
 
         console.log("product with name" + item.name + " added ot cart");
 
         refreshCartDisplay(cart);
     }
 
-    // TODO: how to calculate cart price? server side calls to api?
-    // TODO: before paying we need to refresh the price and availiability of the items
-    // TODO: we should also display availability in the stores
-    // TODO: current solution works only on refresh as add to cart has static values
 </script>
 
 <ul>
