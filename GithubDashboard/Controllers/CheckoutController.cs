@@ -1,4 +1,5 @@
-﻿using System.Data.Entity;
+﻿using System;
+using System.Data.Entity;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,7 @@ namespace GithubDashboard.Controllers
     {
         [HttpGet]
         [Route("/checkout/{orderId}")]
-        public IActionResult Index(int orderId)
+        public IActionResult Index(Guid orderId)
         {
             //handle order not found etc
             using (var context = new MainDatabaseContext())
@@ -21,6 +22,13 @@ namespace GithubDashboard.Controllers
                 return View(order);
             }
             // OOPS ERROR 
+        }
+
+        [HttpPost]
+        [Route("/pay/{orderId}")]
+        public IActionResult Pay(Guid orderId)
+        {
+            return null;
         }
     }
 }

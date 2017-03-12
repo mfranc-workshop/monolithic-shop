@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -5,8 +6,13 @@ namespace GithubDashboard.Data
 {
     public class Order
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public ICollection<ProductOrder> ProductOrders { get; set; }
+
+        public Order()
+        {
+            Id = Guid.NewGuid();
+        }
 
         public decimal Price
         {
