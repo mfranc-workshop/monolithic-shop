@@ -13,4 +13,8 @@
 
 <div>Order Id - @Model.Id</div>
 <div>Full Price - @Model.Price</div>
-<button>Pay</button>
+
+<form action="/pay/@Model.Id" method="Post">
+    <input type="hidden" name="price" value="@Model.Price" />
+    <input type="submit" value="Pay" />
+</form>

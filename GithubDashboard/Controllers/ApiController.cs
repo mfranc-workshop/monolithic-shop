@@ -10,6 +10,7 @@ namespace GithubDashboard.Controllers
         public DbSet<Order> Orders { get; set; }
         public DbSet<ProductOrder> ProductOrders { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Payment> Payments { get; set; }
     }
 
     [Route("api/order")]
@@ -18,8 +19,7 @@ namespace GithubDashboard.Controllers
         [HttpPut]
         public IActionResult Put([FromBody] ICollection<ProductOrder> productOrders)
         {
-            var order = new Order();
-            order.ProductOrders = productOrders;
+            var order = new Order {ProductOrders = productOrders};
 
             using (var context = new MainDatabaseContext())
             {

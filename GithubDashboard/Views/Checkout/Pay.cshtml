@@ -1,0 +1,24 @@
+﻿@model Guid
+
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<form action="/pay/create/" method="post">
+    <input type="hidden" name="orderid" value="@Model"/>
+
+    <span>Card Number</span>
+    <input type="text" name="card.number"/>
+
+    <span>Address</span>
+    <input type="text" name="address"/>
+
+    <span>Payment Type</span>
+    <select name="type">
+        <option value="paypal">PayPal</option>
+        <option value="card">Card</option>
+        <option value="paybycash">Cash</option>
+        <option value="transfer">Transfer</option>
+    </select>
+    <input type="submit" value="Pay"/>
+</form>
