@@ -1,12 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Data.Entity;
+using System.Linq;
+using GithubDashboard.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GithubDashboard.Controllers
 {
-    public class OrderHistoryController : Controller
+    [Authorize]
+    public class OrdersController : Controller
     {
+        [Route("/orders")]
         public IActionResult Index()
         {
-            return View();
+            using (var context = new MainDatabaseContext())
+            {
+                var email = User.GetEmail();
+
+                var orders = context.Orders
+                    .Where(x => x.Buyer.Email == email)
+                    .Include(x => x.Buyer)
+                    .Include(x => x.Payment)
+                    .Include(x => x.ProductOrders.Select(po => po.Product))
+                    .ToList();
+
+                return View(orders);
+            }
         }
     }
 }

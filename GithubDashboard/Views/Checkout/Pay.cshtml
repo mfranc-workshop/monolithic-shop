@@ -7,11 +7,24 @@
 <form action="/pay/create/" method="post">
     <input type="hidden" name="orderid" value="@Model"/>
 
+    <br/>
+
     <span>Card Number</span>
     <input type="text" name="card.number"/>
 
-    <span>Address</span>
-    <input type="text" name="address"/>
+    <br/>
+
+    <span>City</span>
+    <input type="text" name="address.city"/>
+    <span>Street</span>
+    <input type="text" name="address.street"/>
+
+    <br/>
+
+    <span>Name</span>
+    <input type="text" name="user.name"/>
+
+    <br/>
 
     <span>Payment Type</span>
     <select name="type">

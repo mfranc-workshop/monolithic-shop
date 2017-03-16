@@ -12,9 +12,7 @@
 </ul>
 
 <div>Order Id - @Model.Id</div>
-<div>Full Price - @Model.Price</div>
 
-<form action="/pay/@Model.Id" method="Post">
-    <input type="hidden" name="price" value="@Model.Price" />
+<form action="/pay/@Model.Id" method="get">
     <input type="submit" value="Pay" />
 </form>
