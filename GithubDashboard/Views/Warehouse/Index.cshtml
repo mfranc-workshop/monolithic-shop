@@ -1,0 +1,18 @@
+﻿@model IEnumerable<GithubDashboard.Data.Product>
+
+@{
+    ViewData["Title"] = "Shop";
+}
+
+<ul>
+@foreach (var product in Model)
+{
+    <li>
+        @product.Name
+        <form action="/warehouse/@product.Id" method="post">
+            <input type="number" name="NumberAvailable" value="@product.NumberAvailable"/>
+            <button class="btn btn-lg btn-success" type="submit">Update</button>
+        </form>
+    </li>
+}
+</ul>

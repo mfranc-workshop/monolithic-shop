@@ -68,6 +68,8 @@ namespace GithubDashboard.Controllers
                     .Include(p => p.Buyer)
                     .FirstOrDefault();
 
+                payment.Price = order.Price;
+
                 order.Payment = payment;
 
                 var email = User.GetEmail();
