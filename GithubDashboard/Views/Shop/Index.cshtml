@@ -26,11 +26,7 @@ This is Awesome Shop! Stay while and buy!
 
         for (var [key, value] of cart) {
             object.push({
-                 product: {
-                    id: value.id,
-                    name: value.name, 
-                    price: value.price
-                }, 
+                productId: value.id,
                 count: value.count
             });
         }

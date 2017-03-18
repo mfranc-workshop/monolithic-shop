@@ -18,12 +18,24 @@ namespace GithubDashboard.Controllers
                 new Product(89.99m, "Helmet", 4)
             };
 
+            var mockedListOfWarehouse = new List<ProductWarehouse>
+            {
+                new ProductWarehouse(mockedListOfProducts[0], 10),
+                new ProductWarehouse(mockedListOfProducts[1], 10),
+                new ProductWarehouse(mockedListOfProducts[2], 10),
+                new ProductWarehouse(mockedListOfProducts[3], 10)
+            };
 
             using (var context = new MainDatabaseContext())
             {
                 foreach (var mockedListOfProduct in mockedListOfProducts)
                 {
                     context.Products.Add(mockedListOfProduct);
+                }
+
+                foreach (var mockedWar in mockedListOfWarehouse)
+                {
+                    context.ProductsWarehouse.Add(mockedWar);
                 }
 
                 context.SaveChanges();

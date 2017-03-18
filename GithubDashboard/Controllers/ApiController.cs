@@ -12,8 +12,6 @@ namespace GithubDashboard.Controllers
         {
             var order = new Order(productOrders);
 
-            //order.Buyer = buyer;
-
             using (var context = new MainDatabaseContext())
             {
                 context.Orders.Add(order);

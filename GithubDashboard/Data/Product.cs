@@ -5,7 +5,6 @@ namespace GithubDashboard.Data
         public int Id { get; set; }
         public string Name { get; set; }
         public decimal Price { get; set; }
-        public int NumberAvailable { get; set; }
 
         public Product()
         {
@@ -16,7 +15,6 @@ namespace GithubDashboard.Data
             Id = id;
             Price = price;
             Name = name;
-            NumberAvailable = 0;
         }
     }
 }

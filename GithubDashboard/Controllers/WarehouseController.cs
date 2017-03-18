@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Data.Entity;
+using System.Linq;
 using GithubDashboard.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,9 @@ namespace GithubDashboard.Controllers
         {
             using (var context = new MainDatabaseContext())
             {
-                var products = context.Products.ToList();
+                var products = context.ProductsWarehouse
+                    .Include(c => c.Product)
+                    .ToList();
                 return View(products);
             }
         }
@@ -22,10 +25,10 @@ namespace GithubDashboard.Controllers
         {
             using (var context = new MainDatabaseContext())
             {
-                var produt = context.Products
-                    .SingleOrDefault(x => x.Id == id);
+                var productWarehouse = context.ProductsWarehouse
+                    .SingleOrDefault(x => x.Product.Id == id);
 
-                produt.NumberAvailable = numberAvailable;
+                productWarehouse.NumberAvailable = numberAvailable;
 
                 context.SaveChanges();
 
