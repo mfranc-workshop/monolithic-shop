@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GithubDashboard.Controllers
 {
+    [Route("/warehouse")]
     public class WarehouseController : Controller
     {
-        [Route("/warehouse")]
         public IActionResult Index()
         {
             using (var context = new MainDatabaseContext())
@@ -20,7 +20,7 @@ namespace GithubDashboard.Controllers
         }
 
         [HttpPost]
-        [Route("warehouse/{id}")]
+        [Route("{id}")]
         public IActionResult Update([FromForm] int numberAvailable, int id)
         {
             using (var context = new MainDatabaseContext())

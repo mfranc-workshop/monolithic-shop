@@ -2,6 +2,7 @@
 using System.Data.Entity;
 using System.Linq;
 using GithubDashboard.Data;
+using GithubDashboard.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
