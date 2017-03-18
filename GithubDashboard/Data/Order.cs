@@ -7,6 +7,7 @@ namespace GithubDashboard.Data
     public enum OrderStatus
     {
         Delivering = 0,
+        WaitingForWarehouse,
         Blocked,
         Finished
     }
@@ -43,7 +44,7 @@ namespace GithubDashboard.Data
             payment.Price = this.Price;
             this.Payment = payment;
 
-            this.Status = successfullPayment ? OrderStatus.Delivering : OrderStatus.Blocked;
+            this.Status = successfullPayment ? OrderStatus.WaitingForWarehouse : OrderStatus.Blocked;
 
         }
 
@@ -55,6 +56,11 @@ namespace GithubDashboard.Data
         public void Delivered()
         {
             this.Status = OrderStatus.Finished;
+        }
+
+        public void Delivering()
+        {
+            this.Status = OrderStatus.Delivering;
         }
     }
 }

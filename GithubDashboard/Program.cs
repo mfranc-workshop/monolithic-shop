@@ -1,5 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Threading;
+using GithubDashboard.Jobs;
 using Microsoft.AspNetCore.Hosting;
+using Quartz;
+using Quartz.Impl;
 
 namespace GithubDashboard
 {

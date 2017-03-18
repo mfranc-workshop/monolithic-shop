@@ -23,6 +23,7 @@
     "Nancy": "2.0.0-barneyrubble",
     "Nancy.Owin": "1.4.1",
     "Newtonsoft.Json": "9.0.1",
+    "Quartz": "2.5.0",
     "System.Data.SQLite": "1.0.104",
     "System.Data.SQLite.EF6": "1.0.104"
   },

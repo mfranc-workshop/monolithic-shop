@@ -1,5 +1,6 @@
 ﻿using System;
 using AspNet.Security.OAuth.GitHub;
+using GithubDashboard.Jobs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,6 +21,8 @@ namespace GithubDashboard
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
+
+            MainScheduler.Start();
         }
 
         public IConfigurationRoot Configuration { get; }
