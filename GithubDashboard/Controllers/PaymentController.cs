@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Mail;
 using System.Data.Entity;
 using System.Linq;
 using GithubDashboard.Data;
+using GithubDashboard.EmailHelpers;
 using GithubDashboard.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +22,10 @@ namespace GithubDashboard.Controllers
         [Route("/pay/create/")]
         public IActionResult CreatePayment(Payment payment)
         {
+            var email = User.GetEmail();
+
+            var paymentWasCreated = false;
+
             using (var context = new MainDatabaseContext())
             {
                 var order = context.Orders
@@ -30,65 +34,58 @@ namespace GithubDashboard.Controllers
                     .Include(p => p.Buyer)
                     .FirstOrDefault();
 
-                payment.Price = order.Price;
+                if (order == null) return View("Error");
 
-                order.Payment = payment;
-
-                var email = User.GetEmail();
-
-                var existingBuyer = context.Buyers.FirstOrDefault(x => x.Email == email) ?? new Buyer(User.Identity.Name, User.GetEmail());
-
-                order.Buyer = existingBuyer;
+                order.AddPayment(payment);
+                order.AddBuyer(GetOrCreateNewBuyer(context, email));
 
                 context.SaveChanges();
+            }
 
-                var smtpClient = new SmtpClient("localhost", 25);
+            paymentWasCreated = ContactPaymentProvider(payment);
 
-                var mail = new MailMessage
-                {
-                    From = new MailAddress("awesome_shop@com.pl")
-                };
+            SendEmail(email, paymentWasCreated);
 
-                mail.To.Add(new MailAddress(order.Buyer.Email));
+            return paymentWasCreated ? View("Success") : View("Failure");
+        }
 
-                var emailData = Email.Templates[EmailType.PaymentAccepted];
-                mail.Subject = emailData.Item1;
-                mail.Body = emailData.Item2;
+        private Buyer GetOrCreateNewBuyer(MainDatabaseContext context, string email)
+        {
+            return context.Buyers.FirstOrDefault(x => x.Email == email)
+                                ?? new Buyer(User.Identity.Name, User.GetEmail());
+        }
 
-                try
-                {
-                    smtpClient.Send(mail);
-                }
-                catch (Exception ex)
-                {
-                    //log
-                }
+        // Fake call to external payment provider
+        private bool ContactPaymentProvider(Payment payment)
+        {
+            if(payment.Card.Number == "-1") return false;
 
-                return View("Success");
+            return true;
+        }
+
+        private void SendEmail(string email, bool success)
+        {
+            var smtpClient = new SmtpClient("localhost", 25);
+
+            var mail = new MailMessage
+            {
+                From = new MailAddress("awesome_shop@com.pl")
+            };
+
+            mail.To.Add(new MailAddress(email));
+
+            var emailData = Email.Templates[success ? EmailType.PaymentAccepted : EmailType.PaymentRefused];
+            mail.Subject = emailData.Item1;
+            mail.Body = emailData.Item2;
+
+            try
+            {
+                smtpClient.Send(mail);
+            }
+            catch (Exception ex)
+            {
+                //log
             }
         }
-
-        public enum EmailType
-        {
-            PaymentAccepted,
-            PaymentRefused,
-            OrderSend,
-            OrderReceived,
-            OrderDelayed
-        }
-
-        public static class Email
-        {
-            public static Dictionary<EmailType, Tuple<string, string>> Templates = new Dictionary
-                <EmailType, Tuple<string, string>>
-        {
-            { EmailType.PaymentAccepted, new Tuple<string, string>("Payment Accepted", "Thank you, your payment has been accepted. Order should be sent soon.") },
-            { EmailType.PaymentRefused, new Tuple<string, string>("Payment Refused", "Sadly we couldnt accept this type of payment.") },
-            { EmailType.OrderSend, new Tuple<string, string>("Your order has been sent", "Your ourder has been sent.") },
-            { EmailType.OrderDelayed, new Tuple<string, string>("Your order has been delayed", "Your ourder has been delayed.") },
-            { EmailType.OrderReceived, new Tuple<string, string>("Your order has been delivered", "Your ourder has been delivered.") },
-        };
-        }
-
     }
 }

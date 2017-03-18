@@ -39,5 +39,16 @@ namespace GithubDashboard.Data
                 return ProductOrders.Sum(productOrder => productOrder.Count*productOrder.Product.Price);
             }
         }
+
+        public void AddPayment(Payment payment)
+        {
+            payment.Price = this.Price;
+            this.Payment = payment;
+        }
+
+        public void AddBuyer(Buyer buyer)
+        {
+            this.Buyer = buyer;
+        }
     }
 }

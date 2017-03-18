@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using GithubDashboard.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace GithubDashboard.Controllers
 {
