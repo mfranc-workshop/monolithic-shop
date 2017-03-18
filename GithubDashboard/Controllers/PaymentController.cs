@@ -24,7 +24,7 @@ namespace GithubDashboard.Controllers
         {
             var email = User.GetEmail();
 
-            var paymentWasCreated = false;
+            var successfullPayment = false;
 
             using (var context = new MainDatabaseContext())
             {
@@ -36,17 +36,17 @@ namespace GithubDashboard.Controllers
 
                 if (order == null) return View("Error");
 
-                order.AddPayment(payment);
+                successfullPayment = ContactPaymentProvider(payment);
+
+                order.AddPayment(payment, successfullPayment);
                 order.AddBuyer(GetOrCreateNewBuyer(context, email));
 
                 context.SaveChanges();
             }
 
-            paymentWasCreated = ContactPaymentProvider(payment);
+            SendEmail(email, successfullPayment);
 
-            SendEmail(email, paymentWasCreated);
-
-            return paymentWasCreated ? View("Success") : View("Failure");
+            return successfullPayment ? View("Success") : View("Failure");
         }
 
         private Buyer GetOrCreateNewBuyer(MainDatabaseContext context, string email)
@@ -84,7 +84,7 @@ namespace GithubDashboard.Controllers
             }
             catch (Exception ex)
             {
-                //log
+                // swallowing errors!! muahahaha
             }
         }
     }

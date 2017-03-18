@@ -6,9 +6,8 @@ namespace GithubDashboard.Data
 {
     public enum OrderStatus
     {
-        Pending = 0,
-        PendingPayment,
-        Delivering,
+        Delivering = 0,
+        Blocked,
         Finished
     }
 
@@ -23,7 +22,6 @@ namespace GithubDashboard.Data
         public Order()
         {
             Id = Guid.NewGuid();
-            Status = OrderStatus.Pending;
         }
 
         public Order(ICollection<ProductOrder> productOrders)
@@ -40,15 +38,23 @@ namespace GithubDashboard.Data
             }
         }
 
-        public void AddPayment(Payment payment)
+        public void AddPayment(Payment payment, bool successfullPayment)
         {
             payment.Price = this.Price;
             this.Payment = payment;
+
+            this.Status = successfullPayment ? OrderStatus.Delivering : OrderStatus.Blocked;
+
         }
 
         public void AddBuyer(Buyer buyer)
         {
             this.Buyer = buyer;
+        }
+
+        public void Delivered()
+        {
+            this.Status = OrderStatus.Finished;
         }
     }
 }
