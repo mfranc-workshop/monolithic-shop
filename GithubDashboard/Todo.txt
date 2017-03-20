@@ -1,5 +1,0 @@
-﻿    // TODO: how to calculate cart price? server side calls to api?
-    // TODO: before paying we need to refresh the price and availiability of the items
-    // TODO: we should also display availability in the stores
-    // TODO: current solution works only on refresh as add to cart has static values
-    // TODO: will need to add id to cart map
