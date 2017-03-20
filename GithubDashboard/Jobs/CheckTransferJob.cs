@@ -10,10 +10,12 @@ namespace GithubDashboard.Jobs
     public class CheckTransferJob : IJob
     {
         private readonly IEmailService _emailService;
+        private readonly ITransferCheckService _transferCheckService;
 
-        public CheckTransferJob(IEmailService emailService)
+        public CheckTransferJob(IEmailService emailService, ITransferCheckService transferCheckService)
         {
             _emailService = emailService;
+            _transferCheckService = transferCheckService;
         }
 
         public void Execute(IJobExecutionContext jobContext)
@@ -21,35 +23,17 @@ namespace GithubDashboard.Jobs
             using (var context = new MainDatabaseContext())
             {
                 var orders = context.Orders
-                    .Where(x => x.Status == OrderStatus.WaitingForWarehouse)
+                    .Where(x => x.Status == OrderStatus.WaitingForPayment)
                     .Include(o => o.Buyer)
-                    .Include(o => o.ProductOrders.Select(p => p.Product))
                     .ToList();
 
                 foreach (var order in orders)
                 {
-                    var cannotFulfill = (from productOrder in order.ProductOrders
-                        let productWarehouse = context.ProductsWarehouse.FirstOrDefault(pw => pw.Product.Id == productOrder.ProductId)
-                        where productWarehouse.NumberAvailable < productOrder.Count
-                        select productOrder).Any();
-
-                    if (cannotFulfill)
+                    var hasReceivedMoney = _transferCheckService.Check(order.Id);
+                    if(hasReceivedMoney)
                     {
-                        break;
-                    }
-                    else
-                    {
-                        foreach (var productOrder in order.ProductOrders)
-                        {
-                            var productW = context.ProductsWarehouse
-                                .Include(pw => pw.Product)
-                                .FirstOrDefault(x => x.Product.Id == productOrder.ProductId);
-
-                            productW.NumberAvailable = productW.NumberAvailable - productOrder.Count;
-                        }
-
+                        order.Status = OrderStatus.Delivering;
                         _emailService.SendEmail(order.Buyer.Email, EmailType.TransferReceived);
-                        order.Delivering();
                     }
                 }
 

@@ -13,6 +13,8 @@ namespace GithubDashboard.EmailHelpers
                 { EmailType.OrderSend, new Tuple<string, string>("Your order has been sent", "Your ourder has been sent.") },
                 { EmailType.OrderDelayed, new Tuple<string, string>("Your order has been delayed", "Your ourder has been delayed.") },
                 { EmailType.OrderReceived, new Tuple<string, string>("Your order has been delivered", "Your ourder has been delivered.") },
+                { EmailType.TransferReceived, new Tuple<string, string>("We have received the money", "Your ourder will be sent.") },
+                { EmailType.WaitingForTransfer, new Tuple<string, string>("We are waiting for your money", "Your order will be send after moeny is received.") },
             };
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using Quartz;
-using Quartz.Impl;
 using SimpleInjector;
 
 namespace GithubDashboard.Jobs
@@ -24,6 +23,17 @@ namespace GithubDashboard.Jobs
                     .Build();
 
                 scheduler.ScheduleJob(job, trigger);
+
+
+                var triggerTransfer = TriggerBuilder.Create()
+                    .StartNow()
+                    .WithSimpleSchedule(x => x
+                        .WithIntervalInSeconds(60)
+                        .RepeatForever())
+                    .Build();
+
+                var transferJob = JobBuilder.Create<CheckTransferJob>().Build();
+                scheduler.ScheduleJob(transferJob, triggerTransfer);
             }
             catch (SchedulerException se)
             {

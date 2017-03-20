@@ -46,17 +46,25 @@ namespace GithubDashboard.Controllers
 
                 if (order == null) return View("Error");
 
-                successfullPayment = _paymentProvider.SendPaymentData(payment);
-
-                order.AddPayment(payment, successfullPayment);
                 order.AddBuyer(GetOrCreateNewBuyer(context, email));
 
-                context.SaveChanges();
+                if(payment.Type == PaymentType.Card)
+                {
+                    successfullPayment = _paymentProvider.SendPaymentData(payment);
+                    order.PayByCard(payment, successfullPayment);
+                    _emailService.SendEmail(email, successfullPayment ? EmailType.PaymentAccepted : EmailType.PaymentRefused);
+                    context.SaveChanges();
+                    return successfullPayment ? View("Success") : View("Failure");
+                }
+                else
+                {
+                    _emailService.SendEmail(email, EmailType.WaitingForTransfer); 
+                    order.PayByTransfer();
+                    context.SaveChanges();
+                    return View("Success");
+                }
+
             }
-
-            _emailService.SendEmail(email, successfullPayment ? EmailType.PaymentAccepted : EmailType.PaymentRefused);
-
-            return successfullPayment ? View("Success") : View("Failure");
         }
 
         private Buyer GetOrCreateNewBuyer(MainDatabaseContext context, string email)

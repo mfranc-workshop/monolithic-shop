@@ -8,6 +8,7 @@ namespace GithubDashboard.Data
     {
         Delivering = 0,
         WaitingForWarehouse,
+        WaitingForPayment,
         Blocked,
         Finished
     }
@@ -39,11 +40,15 @@ namespace GithubDashboard.Data
             }
         }
 
-        public void AddPayment(Payment payment, bool successfullPayment)
+        public void PayByTransfer()
+        {
+            this.Status = OrderStatus.WaitingForPayment;
+        }
+
+        public void PayByCard(Payment payment, bool successfullPayment)
         {
             payment.Price = this.Price;
             this.Payment = payment;
-
             this.Status = successfullPayment ? OrderStatus.WaitingForWarehouse : OrderStatus.Blocked;
 
         }
