@@ -42,6 +42,7 @@ namespace MicroShop.Data
 
         public void PayByTransfer(Payment payment)
         {
+            payment.Price = this.Price;
             this.Payment = payment;
             this.Status = OrderStatus.WaitingForPayment;
         }
@@ -67,6 +68,11 @@ namespace MicroShop.Data
         public void Delivering()
         {
             this.Status = OrderStatus.Delivering;
+        }
+
+        public void TransferReceived()
+        {
+            this.Status = OrderStatus.WaitingForWarehouse;
         }
     }
 }

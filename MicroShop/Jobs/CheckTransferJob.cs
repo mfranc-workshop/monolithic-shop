@@ -32,7 +32,7 @@ namespace MicroShop.Jobs
                     var hasReceivedMoney = _transferCheckService.Check(order.Id);
                     if(hasReceivedMoney)
                     {
-                        order.Status = OrderStatus.Delivering;
+                        order.TransferReceived();
                         _emailService.SendEmail(order.Buyer.Email, EmailType.TransferReceived);
                     }
                 }
