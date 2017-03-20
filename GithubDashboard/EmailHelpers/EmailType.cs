@@ -6,6 +6,8 @@
         PaymentRefused,
         OrderSend,
         OrderReceived,
-        OrderDelayed
+        OrderDelayed,
+        TransferReceived,
+        WaitingForTransfer
     }
 }

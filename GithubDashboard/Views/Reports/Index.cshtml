@@ -1,12 +1,14 @@
-﻿@{
+﻿@model GithubDashboard.Data.Report
+
+@{
     ViewData["Title"] = "Report";
 }
 
-Pending Orders - 1000
+Pending Orders - @Model.PendingOrders 
 <br/>
-Fullfiled Orders - 2000
+Fullfiled Orders - @Model.DeliveredOrders
 <br/>
-Sold Amount - 20020
+Sold Amount - @Model.NumberSold
 <br/>
-Sold Money - 2000$
+Sold Money - @Model.MoneySold
 <br/>

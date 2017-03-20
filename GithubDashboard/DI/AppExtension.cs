@@ -26,6 +26,7 @@ namespace GithubDashboard.DI
             });
 
             container.Register<IPaymentProvider, PaymentProvider>();
+            container.Register<IReportGenerator, ReportGenerator>();
 
             container.Verify();
         }
