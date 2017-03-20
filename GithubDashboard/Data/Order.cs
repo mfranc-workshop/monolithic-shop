@@ -40,8 +40,9 @@ namespace GithubDashboard.Data
             }
         }
 
-        public void PayByTransfer()
+        public void PayByTransfer(Payment payment)
         {
+            this.Payment = payment;
             this.Status = OrderStatus.WaitingForPayment;
         }
 
