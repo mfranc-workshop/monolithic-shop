@@ -1,15 +1,21 @@
-﻿using System;
-using System.Data.Entity;
+﻿using System.Data.Entity;
 using System.Linq;
-using System.Net.Mail;
 using GithubDashboard.Data;
 using GithubDashboard.EmailHelpers;
+using GithubDashboard.Services;
 using Quartz;
 
 namespace GithubDashboard.Jobs
 {
     public class WarehouseJob : IJob
     {
+        private readonly IEmailService _emailService;
+
+        public WarehouseJob(IEmailService emailService)
+        {
+            _emailService = emailService;
+        }
+
         public void Execute(IJobExecutionContext jobContext)
         {
             using (var context = new MainDatabaseContext())
@@ -42,37 +48,12 @@ namespace GithubDashboard.Jobs
                             productW.NumberAvailable = productW.NumberAvailable - productOrder.Count;
                         }
 
-                        SendEmail(order.Buyer.Email);
+                        _emailService.SendEmail(order.Buyer.Email, EmailType.OrderSend);
                         order.Delivering();
                     }
                 }
 
                 context.SaveChanges();
-            }
-        }
-
-        private void SendEmail(string email)
-        {
-            var smtpClient = new SmtpClient("localhost", 25);
-
-            var mail = new MailMessage
-            {
-                From = new MailAddress("awesome_shop@com.pl")
-            };
-
-            mail.To.Add(new MailAddress(email));
-
-            var emailData = Email.Templates[EmailType.OrderSend];
-            mail.Subject = emailData.Item1;
-            mail.Body = emailData.Item2;
-
-            try
-            {
-                smtpClient.Send(mail);
-            }
-            catch (Exception ex)
-            {
-                // swallowing errors!! muahahaha
             }
         }
     }

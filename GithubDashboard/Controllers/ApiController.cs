@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Data.Entity;
-using System.Net.Mail;
 using GithubDashboard.Data;
 using GithubDashboard.EmailHelpers;
+using GithubDashboard.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GithubDashboard.Controllers
@@ -11,6 +11,13 @@ namespace GithubDashboard.Controllers
     [Route("api")]
     public class OrderApi : Controller
     {
+        private readonly IEmailService _emailService;
+
+        public OrderApi(IEmailService emailService)
+        {
+            _emailService = emailService;
+        }
+
         // Get here for ease of use, normally state change shouldnt be modified by Get
         [HttpGet]
         [Route("order/{guid}/delivered")]
@@ -28,37 +35,12 @@ namespace GithubDashboard.Controllers
 
                 order.Delivered();
 
-                SendEmail(order.Buyer.Email);
+                _emailService.SendEmail(order.Buyer.Email, EmailType.OrderReceived);
 
                 context.SaveChanges();
             }
 
             return "order delivered";
-        }
-
-        private void SendEmail(string email)
-        {
-            var smtpClient = new SmtpClient("localhost", 25);
-
-            var mail = new MailMessage
-            {
-                From = new MailAddress("awesome_shop@com.pl")
-            };
-
-            mail.To.Add(new MailAddress(email));
-
-            var emailData = Email.Templates[EmailType.OrderReceived];
-            mail.Subject = emailData.Item1;
-            mail.Body = emailData.Item2;
-
-            try
-            {
-                smtpClient.Send(mail);
-            }
-            catch (Exception ex)
-            {
-                //log
-            }
         }
     }
 }

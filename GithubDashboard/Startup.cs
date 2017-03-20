@@ -1,18 +1,24 @@
 ﻿using System;
 using AspNet.Security.OAuth.GitHub;
+using GithubDashboard.DI;
 using GithubDashboard.Jobs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SimpleInjector;
+using SimpleInjector.Integration.AspNetCore.Mvc;
 
 namespace GithubDashboard
 {
     public class Startup
     {
+        private readonly Container _container = new Container();
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -21,8 +27,6 @@ namespace GithubDashboard
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
-
-            MainScheduler.Start();
         }
 
         public IConfigurationRoot Configuration { get; }
@@ -35,11 +39,17 @@ namespace GithubDashboard
             });
 
             services.AddMvc();
+
+            services.AddSingleton<IControllerActivator>(new SimpleInjectorControllerActivator(_container));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseStaticFiles();
+
+            app.InitializeContainer(_container, env);
+
+            MainScheduler.Start(_container);
 
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {

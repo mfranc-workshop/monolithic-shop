@@ -5,12 +5,22 @@ using System.Linq;
 using GithubDashboard.Data;
 using GithubDashboard.EmailHelpers;
 using GithubDashboard.Helpers;
+using GithubDashboard.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GithubDashboard.Controllers
 {
     public class PaymentController : Controller
     {
+        private readonly IEmailService _emailService;
+        private readonly IPaymentProvider _paymentProvider;
+
+        public PaymentController(IEmailService emailService, IPaymentProvider paymentProvider)
+        {
+            _emailService = emailService;
+            _paymentProvider = paymentProvider;
+        }
+
         [HttpGet]
         [Route("/pay/{orderId}")]
         public IActionResult Pay(Guid orderId)
@@ -36,7 +46,7 @@ namespace GithubDashboard.Controllers
 
                 if (order == null) return View("Error");
 
-                successfullPayment = ContactPaymentProvider(payment);
+                successfullPayment = _paymentProvider.SendPaymentData(payment);
 
                 order.AddPayment(payment, successfullPayment);
                 order.AddBuyer(GetOrCreateNewBuyer(context, email));
@@ -44,7 +54,7 @@ namespace GithubDashboard.Controllers
                 context.SaveChanges();
             }
 
-            SendEmail(email, successfullPayment);
+            _emailService.SendEmail(email, successfullPayment ? EmailType.PaymentAccepted : EmailType.PaymentRefused);
 
             return successfullPayment ? View("Success") : View("Failure");
         }
@@ -53,39 +63,6 @@ namespace GithubDashboard.Controllers
         {
             return context.Buyers.FirstOrDefault(x => x.Email == email)
                                 ?? new Buyer(User.Identity.Name, User.GetEmail());
-        }
-
-        // Fake call to external payment provider
-        private bool ContactPaymentProvider(Payment payment)
-        {
-            if(payment.Card.Number == "-1") return false;
-
-            return true;
-        }
-
-        private void SendEmail(string email, bool success)
-        {
-            var smtpClient = new SmtpClient("localhost", 25);
-
-            var mail = new MailMessage
-            {
-                From = new MailAddress("awesome_shop@com.pl")
-            };
-
-            mail.To.Add(new MailAddress(email));
-
-            var emailData = Email.Templates[success ? EmailType.PaymentAccepted : EmailType.PaymentRefused];
-            mail.Subject = emailData.Item1;
-            mail.Body = emailData.Item2;
-
-            try
-            {
-                smtpClient.Send(mail);
-            }
-            catch (Exception ex)
-            {
-                // swallowing errors!! muahahaha
-            }
         }
     }
 }

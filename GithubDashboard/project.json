@@ -24,6 +24,9 @@
     "Nancy.Owin": "1.4.1",
     "Newtonsoft.Json": "9.0.1",
     "Quartz": "2.5.0",
+    "SimpleInjector": "3.3.2",
+    "SimpleInjector.Integration.AspNetCore": "3.3.2",
+    "SimpleInjector.Integration.AspNetCore.Mvc": "3.3.2",
     "System.Data.SQLite": "1.0.104",
     "System.Data.SQLite.EF6": "1.0.104"
   },
