@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using MicroShop.Data;
 
@@ -8,7 +9,7 @@ namespace MicroShop.Controllers
     {
         [HttpGet]
         [Route("/initdb")]
-        public bool Init()
+        public string Init()
         {
             var mockedListOfProducts = new List<Product>
             {
@@ -26,21 +27,28 @@ namespace MicroShop.Controllers
                 new ProductWarehouse(mockedListOfProducts[3], 10)
             };
 
-            using (var context = new MainDatabaseContext())
+            try
             {
-                foreach (var mockedListOfProduct in mockedListOfProducts)
+                using (var context = new MainDatabaseContext())
                 {
-                    context.Products.Add(mockedListOfProduct);
+                    foreach (var mockedListOfProduct in mockedListOfProducts)
+                    {
+                        context.Products.Add(mockedListOfProduct);
+                    }
+
+                    foreach (var mockedWar in mockedListOfWarehouse)
+                    {
+                        context.ProductsWarehouse.Add(mockedWar);
+                    }
+
+                    context.SaveChanges();
+
+                    return "data initialized";
                 }
-
-                foreach (var mockedWar in mockedListOfWarehouse)
-                {
-                    context.ProductsWarehouse.Add(mockedWar);
-                }
-
-                context.SaveChanges();
-
-                return true;
+            }
+            catch (Exception ex)
+            {
+                return $"there was a problem with \r\n- {ex.Message}";
             }
         }
     }
