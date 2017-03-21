@@ -1,6 +1,9 @@
 using System.Net.Mail;
+using MassTransit;
+using MassTransit.SimpleInjectorIntegration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using MicroShop.Bus;
 using MicroShop.Services;
 using Quartz.Impl;
 using SimpleInjector;
@@ -28,8 +31,28 @@ namespace MicroShop.DI
             container.Register<IPaymentProvider, PaymentProvider>();
             container.Register<IReportGenerator, ReportGenerator>();
             container.Register<ITransferCheckService, TransferCheckService>();
+            container.Register<EmailConsumer>();
+
+            var bus = MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
+            {
+
+                //var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+                //{
+                //    h.Username("guest");
+                //    h.Password("guest");
+                //});
+
+                cfg.ReceiveEndpoint(/*host, */"email_queue", c =>
+                {
+                    c.LoadFrom(container);
+                });
+            });
+
+            container.Register<IBus>(() => bus);
 
             container.Verify();
+
+            bus.Start();
         }
     }
 }

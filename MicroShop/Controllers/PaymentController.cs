@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Data.Entity;
 using System.Linq;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using MicroShop.Bus;
 using MicroShop.Data;
 using MicroShop.EmailHelpers;
 using MicroShop.Helpers;
@@ -13,11 +15,13 @@ namespace MicroShop.Controllers
     {
         private readonly IEmailService _emailService;
         private readonly IPaymentProvider _paymentProvider;
+        private readonly IBus _bus;
 
-        public PaymentController(IEmailService emailService, IPaymentProvider paymentProvider)
+        public PaymentController(IEmailService emailService, IPaymentProvider paymentProvider, IBus bus)
         {
             _emailService = emailService;
             _paymentProvider = paymentProvider;
+            _bus = bus;
         }
 
         [HttpGet]
@@ -52,12 +56,14 @@ namespace MicroShop.Controllers
                     successfullPayment = _paymentProvider.SendPaymentData(payment);
                     order.PayByCard(payment, successfullPayment);
                     _emailService.SendEmail(email, successfullPayment ? EmailType.PaymentAccepted : EmailType.PaymentRefused);
+                    _bus.Publish<EmailSend>(new {Email = email, EmailType = successfullPayment ? EmailType.PaymentAccepted : EmailType.PaymentRefused }).Wait();
                     context.SaveChanges();
                     return successfullPayment ? View("Success") : View("Failure");
                 }
                 else
                 {
                     _emailService.SendEmail(email, EmailType.WaitingForTransfer); 
+                    _bus.Publish<EmailSend>(new {Email = email, EmailType = EmailType.WaitingForTransfer }).Wait();
                     order.PayByTransfer(payment);
                     context.SaveChanges();
                     return View("Success");
