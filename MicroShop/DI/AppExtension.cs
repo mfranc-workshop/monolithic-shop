@@ -34,16 +34,20 @@ namespace MicroShop.DI
 
             var bus = Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
-                cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+                var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
                     h.Username("guest");
                     h.Password("guest");
                 });
+                
+                cfg.ReceiveEndpoint(host, "main_queue", c => { });
             });
 
             container.Register<IBus>(() => bus);
 
             container.Verify();
+
+            bus.Start();
         }
     }
 }

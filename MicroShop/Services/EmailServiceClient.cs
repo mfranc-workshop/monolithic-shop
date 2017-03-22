@@ -21,7 +21,7 @@ namespace MicroShop.Services
     public class EmailSend
     {
         public string Email { get; set; }
-        public EmailType Type { get; set; }
+        public int EmailType { get; set; }
     }
 
     public class EmailService : IEmailService
@@ -35,7 +35,7 @@ namespace MicroShop.Services
 
         public bool SendEmail(string email, EmailType type)
         {
-            _bus.Publish<EmailSend>(new { Email = email, Type = type });
+            _bus.Publish<EmailSend>(new { Email = email, EmailType = type });
             return true;
         }
     }
