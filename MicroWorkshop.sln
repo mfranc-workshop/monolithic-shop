@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MicroShop", "MicroShop\MicroShop.xproj", "{41BEEBC7-CD1F-4168-9DAE-9C24C91D416F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMicroservice", "SimpleMicroservice\SimpleMicroservice.csproj", "{51F793BE-9299-48FA-8E26-EBEB274F4F0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{41BEEBC7-CD1F-4168-9DAE-9C24C91D416F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41BEEBC7-CD1F-4168-9DAE-9C24C91D416F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41BEEBC7-CD1F-4168-9DAE-9C24C91D416F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51F793BE-9299-48FA-8E26-EBEB274F4F0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51F793BE-9299-48FA-8E26-EBEB274F4F0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51F793BE-9299-48FA-8E26-EBEB274F4F0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51F793BE-9299-48FA-8E26-EBEB274F4F0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
