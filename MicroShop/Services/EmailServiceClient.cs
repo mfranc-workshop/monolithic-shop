@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using RestEase;
+﻿using MassTransit;
 
 namespace MicroShop.Services
 {
@@ -16,7 +15,28 @@ namespace MicroShop.Services
 
     public interface IEmailService
     {
-        [Post("email")]
-        Task<bool> SendEmail(string email, EmailType type);
+        bool SendEmail(string email, EmailType type);
+    }
+
+    public class EmailSend
+    {
+        public string Email { get; set; }
+        public EmailType Type { get; set; }
+    }
+
+    public class EmailService : IEmailService
+    {
+        private readonly IBus _bus;
+
+        public EmailService(IBus bus)
+        {
+            _bus = bus;
+        }
+
+        public bool SendEmail(string email, EmailType type)
+        {
+            _bus.Publish<EmailSend>(new { Email = email, Type = type });
+            return true;
+        }
     }
 }

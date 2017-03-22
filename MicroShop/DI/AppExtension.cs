@@ -1,4 +1,6 @@
+using System;
 using System.Net.Mail;
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using MicroShop.Services;
@@ -17,7 +19,7 @@ namespace MicroShop.DI
 
             container.RegisterMvcControllers(app);
 
-            container.RegisterSingleton(() => RestClient.For<IEmailService>("http://localhost:50001"));
+            container.Register<IEmailService, EmailService>();
             container.RegisterSingleton(() => new SmtpClient("localhost", 25));
             container.Register(() =>
             {
@@ -29,6 +31,17 @@ namespace MicroShop.DI
             container.Register<IPaymentProvider, PaymentProvider>();
             container.Register<IReportGenerator, ReportGenerator>();
             container.Register<ITransferCheckService, TransferCheckService>();
+
+            var bus = Bus.Factory.CreateUsingRabbitMq(cfg =>
+            {
+                cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+                });
+            });
+
+            container.Register<IBus>(() => bus);
 
             container.Verify();
         }
