@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using MicroShop.Services;
 using Quartz.Impl;
+using RestEase;
 using SimpleInjector;
 using SimpleInjector.Integration.AspNetCore;
 
@@ -16,7 +17,7 @@ namespace MicroShop.DI
 
             container.RegisterMvcControllers(app);
 
-            container.RegisterSingleton<IEmailService, EmailService>();
+            container.RegisterSingleton(() => RestClient.For<IEmailService>("http://localhost:50001"));
             container.RegisterSingleton(() => new SmtpClient("localhost", 25));
             container.Register(() =>
             {

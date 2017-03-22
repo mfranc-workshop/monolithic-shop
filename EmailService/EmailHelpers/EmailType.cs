@@ -2,7 +2,7 @@
 {
     public enum EmailType
     {
-        PaymentAccepted,
+        PaymentAccepted = 0,
         PaymentRefused,
         OrderSend,
         OrderReceived,

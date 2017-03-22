@@ -1,7 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Linq;
 using MicroShop.Data;
-using MicroShop.EmailHelpers;
 using MicroShop.Services;
 using Quartz;
 

@@ -3,7 +3,6 @@ using System.Data.Entity;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using MicroShop.Data;
-using MicroShop.EmailHelpers;
 using MicroShop.Services;
 
 namespace MicroShop.Controllers
