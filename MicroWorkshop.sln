@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMicroservice", "Simpl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService", "EmailService\EmailService.csproj", "{3A84C306-64BC-448C-9AD7-0A7FD6AE4707}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microshop.Contract", "Microshop.Contract\Microshop.Contract.csproj", "{62B8965E-3CF8-4038-A7BD-F1E87B0D9285}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{3A84C306-64BC-448C-9AD7-0A7FD6AE4707}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A84C306-64BC-448C-9AD7-0A7FD6AE4707}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A84C306-64BC-448C-9AD7-0A7FD6AE4707}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62B8965E-3CF8-4038-A7BD-F1E87B0D9285}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62B8965E-3CF8-4038-A7BD-F1E87B0D9285}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62B8965E-3CF8-4038-A7BD-F1E87B0D9285}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62B8965E-3CF8-4038-A7BD-F1E87B0D9285}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

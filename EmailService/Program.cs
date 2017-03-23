@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using EmailService.EmailHelpers;
+using MassTransit;
+using Microshop.Contract;
 using Nancy;
 using Nancy.Hosting.Self;
-using Nancy.ModelBinding;
 using NLog;
 using NLog.Targets;
 using StatsdClient;
@@ -12,29 +14,28 @@ using Topshelf;
 
 namespace EmailService
 {
-    public class EmailMessage
-    {
-        public string Email { get; set; }
-        public EmailType Type { get; set; }
-    }
-
-    public class MainEndpoint : NancyModule
+    public class EmailConsumer : IConsumer<SendEmail>
     {
         private ILogger _logger = LogManager.GetCurrentClassLogger();
-        private IEmailService _emailService;
+        private readonly IEmailService _emailService;
 
-        public IEnumerable<string> GetLogs()
+        public EmailConsumer()
         {
-            var target = (MemoryTarget)LogManager.Configuration.FindTargetByName("memory");
-            return target.Logs;
+            var smtpClient = new SmtpClient("localhost", 25);
+            _emailService = new EmailService(smtpClient);
         }
 
-        public bool SendEmail(EmailMessage message)
+        public async Task Consume(ConsumeContext<SendEmail> context)
+        {
+            await Task.Run(() => SendEmail(context.Message));
+        }
+
+        private bool SendEmail(SendEmail message)
         {
             try
             {
-                _logger.Info($"Sending email : '{message.Type}' to : '{message.Email}'");
-                _emailService.SendEmail(message.Email, message.Type);
+                _logger.Info($"Sending email : '{message.EmailType}' to : '{message.Email}'");
+                _emailService.SendEmail(message.Email, (EmailType)message.EmailType);
                 Metrics.Counter("email_sent");
                 return true;
             }
@@ -45,31 +46,37 @@ namespace EmailService
                 return false;
             }
         }
+    }
+
+    public class EmailMessage
+    {
+        public string Email { get; set; }
+        public EmailType Type { get; set; }
+    }
+
+    public class MainEndpoint : NancyModule
+    {
+        public IEnumerable<string> GetLogs()
+        {
+            var target = (MemoryTarget)LogManager.Configuration.FindTargetByName("memory");
+            return target.Logs;
+        }
 
         public Dictionary<string, bool> HealthCheck()
         {
-            var smptServerIsOnline = _emailService.PingServer();
+            var smptServerIsOnline = true;
+            var isRabbitMqOk = true;
             return new Dictionary<string, bool>
             {
-                {"Ok", smptServerIsOnline},
-                {"smtpServer", smptServerIsOnline}
+                {"Ok", smptServerIsOnline && isRabbitMqOk },
+                {"smtpServer", smptServerIsOnline},
+                {"rabbitMQ", isRabbitMqOk }
             };
         }
 
-
         public MainEndpoint()
         {
-            var smtpClient = new SmtpClient("localhost", 25);
-            _emailService = new EmailService(smtpClient);
-
             Get["/"] = args => Response.AsRedirect("/health");
-
-            Post["/email"] = args =>
-            {
-                var data = this.Bind<EmailMessage>();
-                var emailSendResult = SendEmail(data);
-                return Response.AsJson(string.Empty, emailSendResult ? HttpStatusCode.OK : HttpStatusCode.InternalServerError);
-            };
 
             // it is important that service lets us know what is faulting
             Get["/health"] = args => Response.AsJson(HealthCheck());
@@ -81,9 +88,26 @@ namespace EmailService
     {
         private ILogger _logger = LogManager.GetCurrentClassLogger();
         private NancyHost _nancyHost;
+        private IBusControl _bus;
 
         public void Start()
         {
+            _bus = Bus.Factory.CreateUsingRabbitMq(cf =>
+            {
+                var host = cf.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+                });
+
+                cf.ReceiveEndpoint(host, "email_queue", c =>
+                {
+                    c.Consumer<EmailConsumer>();
+                });
+            });
+
+            _bus.Start();
+
             Metrics.Configure(new MetricsConfig
             {
                 StatsdServerName = "statsd.hostedgraphite.com",
@@ -103,6 +127,7 @@ namespace EmailService
         public void Stop()
         {
             _nancyHost.Stop();
+            _bus.Stop();
             _logger.Info("Service has stopped.");
         }
     }
