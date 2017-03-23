@@ -39,8 +39,6 @@ namespace MicroShop.DI
                     h.Username("guest");
                     h.Password("guest");
                 });
-                
-                cfg.ReceiveEndpoint(host, "main_queue", c => { });
             });
 
             container.Register<IBus>(() => bus);

@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using System;
+using MassTransit;
 
 namespace MicroShop.Services
 {
@@ -26,16 +27,16 @@ namespace MicroShop.Services
 
     public class EmailService : IEmailService
     {
-        private readonly IBus _bus;
+        private readonly ISendEndpoint _sendEndpoint;
 
         public EmailService(IBus bus)
         {
-            _bus = bus;
+            _sendEndpoint = bus.GetSendEndpoint(new Uri("rabbitmq://localhost/email_queue")).Result;
         }
 
         public bool SendEmail(string email, EmailType type)
         {
-            _bus.Publish<EmailSend>(new { Email = email, EmailType = type });
+            _sendEndpoint.Send(new EmailSend { Email = email, EmailType = (int)type });
             return true;
         }
     }
