@@ -1,6 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Net.NetworkInformation;
 using NLog;
 using Quartz;
 using Quartz.Impl;
@@ -12,11 +10,11 @@ namespace TransferCheckService.Jobs
         private static ILogger _logger = LogManager.GetCurrentClassLogger();
         private static IScheduler _scheduler;
 
-        public static void Start()
+        public static void Start(SimpleInjector.Container container)
         {
             try
             {
-                _scheduler = new StdSchedulerFactory().GetScheduler();
+                _scheduler = container.GetInstance<IScheduler>();
                 _scheduler.Start();
 
                 var triggerTransfer = TriggerBuilder.Create()

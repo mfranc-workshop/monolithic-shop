@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using MassTransit;
 using Nancy;
 using Nancy.Hosting.Self;
 using NLog;
 using NLog.Targets;
+using Quartz.Impl;
+using SimpleInjector;
 using StatsdClient;
 using Topshelf;
 using TransferCheckService.Jobs;
-using HttpStatusCode = Nancy.HttpStatusCode;
 
 namespace TransferCheckService
 {
@@ -25,11 +27,13 @@ namespace TransferCheckService
         {
             var externalBankSystem = true;
             var database = true;
+            var rabbitMq = true;
             return new Dictionary<string, bool>
             {
-                {"Ok", externalBankSystem && database },
+                {"Ok", externalBankSystem && database && rabbitMq },
                 {"externalBankSystem", externalBankSystem},
-                {"database", database}
+                {"database", database},
+                { "rabbitMq", rabbitMq }
             };
         }
 
@@ -47,9 +51,22 @@ namespace TransferCheckService
     {
         private ILogger _logger = LogManager.GetCurrentClassLogger();
         private NancyHost _nancyHost;
+        private IBusControl _bus;
 
         public void Start()
         {
+            var container = new Container();
+            container.Register(() =>
+            {
+                var sched = new StdSchedulerFactory().GetScheduler();
+                sched.JobFactory = new SimpleInjectiorJobFactory(container);
+                return sched;
+            });
+
+            container.Register<IEmailService, EmailService>();
+            container.Register<ITransferCheckService, TransferCheckService>();
+            container.Register<CheckTransferJob>();
+
             Metrics.Configure(new MetricsConfig
             {
                 StatsdServerName = "statsd.hostedgraphite.com",
@@ -57,7 +74,20 @@ namespace TransferCheckService
                 StatsdServerPort = 8125
             });
 
-            MainScheduler.Start();
+            _bus = Bus.Factory.CreateUsingRabbitMq(cf =>
+            {
+                var host = cf.Host(new Uri("rabbitmq://localhost/"), h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+                });
+            });
+
+            _bus.Start();
+
+            container.Register<IBus>(() => _bus);
+
+            MainScheduler.Start(container);
 
             var cfg = new HostConfiguration();
             cfg.RewriteLocalhost = true;
@@ -72,6 +102,7 @@ namespace TransferCheckService
         {
             MainScheduler.Stop();
             _nancyHost.Stop();
+            _bus.Stop();
             _logger.Info("Service has stopped.");
         }
     }
@@ -89,7 +120,7 @@ namespace TransferCheckService
                     cfg.WhenStopped(sh => sh.Stop());
                 });
 
-                f.RunAs($"{Environment.MachineName}\\mfranc", "{}");
+                f.RunAs($"{Environment.MachineName}\\mfranc", "mopsik00");
                 f.SetDescription("Transfer Check Service");
                 f.SetDisplayName("Transfer Check Service");
                 f.SetServiceName("Transfer Check Service");
